@@ -21,33 +21,31 @@ const createMovie = async (req: Request, res: Response): Promise<Response> => {
 
   return res.status(201).json(queryResult.rows[0]);
 };
-
-const listAllMovies = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+const listAllMovies = async (req: Request, res: Response): Promise<Response> => {
   const category = req.query.category;
 
-  let queryString: string = ``;
-  let queryResult: QueryResult<IMovies>;
-
+  let queryString: string;
+  let queryConfig: QueryConfig;
+  
   if (category) {
     queryString = `
-    SELECT * FROM movies
-    WHERE category = $1;
-`;
-    const queryConfig: QueryConfig = {
+      SELECT * FROM movies
+      WHERE category = $1;
+    `;
+    queryConfig = {
       text: queryString,
       values: [category],
     };
-    queryResult = await client.query(queryConfig);
   } else {
     queryString = `
-      SELECT * FROM movies ;
+      SELECT * FROM movies;
     `;
-
-    queryResult = await client.query(queryString);
+    queryConfig = {
+      text: queryString,
+    };
   }
+  
+  let queryResult: QueryResult<IMovies> = await client.query(queryConfig);
 
   return res.status(200).json(queryResult.rows);
 };
